@@ -10,11 +10,12 @@ var express 	= require('express');		// call express
 var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var watson		= require('watson-developer-cloud');
-var jQuery 		= require('jQuery');
+var request 	= require('request');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
 
-var Report		= require('./models/report');
+var Report = require('./models/report.js');
+
 // create a new express server
 var app = express();
 
@@ -47,44 +48,52 @@ router.get('/', function(req, res) {
 
 // more routes for our API will happen here
 
+// on routes that end in /analyze
+// ----------------------------------------------------
+router.route('/analyze')
+
+	// create a report (accessed at POST http://localhost:$port/api/reports)
+	.get(function(req, res, next) {
+		var text = { text: req.query.text };
+
+		personalityInsights.profile(text, function(err, profile) {
+			if (err)
+				return next(err);
+			else
+				return res.json(profile.tree.children);
+		});
+	});
+
 // on routes that end in /reports
 // ----------------------------------------------------
 router.route('/reports')
 
-    // create a report (accessed at POST http://localhost:$port/api/reports)
-    .post(function(req, res) {
-        
-        var report = new Report();      // create a new instance of the Report model
-        report.name = req.query.name;	// set the bears name (comes from the request)
-        report.report = jQuery.ajax({
-							url: "/analyze",
-							type: 'GET',
-							contentType:'application/json',
-							data: {
-								text: req.query.text
-							},
-					  		success: function(data) {
-							try {
-									return JSON.stringify(data);
-									console.log(JSON.stringify(data));
-								} catch(err) {
-									console.log(err);
-								}},
-							error: function(xhr, textStatus, thrownError) {
-								reportError(textStatus);
-								console.log("Error1: " + xhr);
-								console.log("Error2.2: " + thrownError);
-								console.log("Error3: " + textStatus);
-							}
-						});
+    // create a report and save it to mongodb (accessed at POST http://localhost:$port/api/reports)
+    .post(function(req, res, next) {
+    	var name = req.query.name;
 
-        // save the report and check for errors
-        report.save(function(err) {
-            if (err)
-                res.send(err);
+    	personalityInsights.profile({ text: req.query.text }, function(err, profile) {
+    		var insight;
 
-            res.json({ message: 'Report created!' });
-        });   
+			if (err) {
+				return next(err);
+			}
+			else {
+				insight = JSON.stringify(profile.tree.children, null, 2);
+			}
+
+			var report = new Report();      // create a new instance of the Report model
+	        report.name = name;	// set the bears name (comes from the request)
+	        report.report = insight;
+
+	        // save the report and check for errors
+	        report.save(function(err) {
+	            if (err)
+	                res.send(err);
+
+	            res.json({ message: 'Report created!' });
+	        });
+		});
     })
 
 	// get all the reports (accessed at GET http://localhost:$port/api/reports)
@@ -96,23 +105,6 @@ router.route('/reports')
             res.json(reports);
         });
     });
-
-// on routes that end in /analyze
-// ----------------------------------------------------
-router.route('/analyze')
-
-	// create a report (accessed at POST http://localhost:$port/api/reports)
-	.get(function(req, res, next) {
-		var name = { name: req.query.name };
-		var text = { text: req.query.text };
-
-		personalityInsights.profile(text, function(err, profile) {
-			if (err)
-				return next(err);
-			else
-				return res.json(profile.tree.children);
-		});
-	});
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
