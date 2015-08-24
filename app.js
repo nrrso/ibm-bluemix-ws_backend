@@ -11,10 +11,18 @@ var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
+// 
+var personalityInsights = require('watson-developer-cloud');
 
 var Report		= require('./models/report');
 // create a new express server
 var app = express();
+
+var personalityInsights = watson.personality_insights({ // watson api
+	username: '5f7e254b-36bc-462e-aaad-3632fe820a23',
+	password: 'wWUvvHwHfZEI',
+	version: 'v2'
+})
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -47,7 +55,7 @@ router.route('/reports')
     .post(function(req, res) {
         
         var report = new Report();      // create a new instance of the Report model
-        report.name = req.body.name;  // set the bears name (comes from the request)
+        report.name = req.body.name;	// set the bears name (comes from the request)
         report.report = req.body.report;	// set the stringified json
 
         // save the report and check for errors
@@ -65,10 +73,16 @@ router.route('/reports')
 router.route('/analyze')
 
 	//
-	.post(function(req, res) {
-		var name = req.body.name;
-		var text = req.body.report;
-		
+	.get(function(req, res, next) {
+		var name = { name: req.body.name };
+		var text = { text: req.body.text };
+
+		personalityInsights.profile(text, function(err, profile) {
+			if (err)
+				return next(err);
+			else
+				return res.json(profile);
+		});
 	});
 
 // REGISTER OUR ROUTES -------------------------------
