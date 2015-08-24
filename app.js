@@ -9,10 +9,10 @@
 var express 	= require('express');		// call express
 var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
+var watson		= require('watson-developer-cloud');
+var jQuery 		= require('jQuery');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
-// 
-var personalityInsights = require('watson-developer-cloud');
 
 var Report		= require('./models/report');
 // create a new express server
@@ -36,13 +36,13 @@ var router = express.Router();              // get an instance of the express Ro
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
-    console.log('Incoming ');
+    console.log('༼ つ ◕_◕ ༽つ  Incoming');
     next(); // make sure we go to the next routes and don't stop here
 });
 
 // test route to make sure everything is working (accessed at GET http://localhost:$port/api)
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.json({ message: 'Success! welcome to our api!' });   
 });
 
 // more routes for our API will happen here
@@ -51,12 +51,32 @@ router.get('/', function(req, res) {
 // ----------------------------------------------------
 router.route('/reports')
 
-    // create a bear (accessed at POST http://localhost:$port/api/reports)
+    // create a report (accessed at POST http://localhost:$port/api/reports)
     .post(function(req, res) {
         
         var report = new Report();      // create a new instance of the Report model
-        report.name = req.body.name;	// set the bears name (comes from the request)
-        report.report = req.body.report;	// set the stringified json
+        report.name = req.query.name;	// set the bears name (comes from the request)
+        report.report = jQuery.ajax({
+							url: "/analyze",
+							type: 'GET',
+							contentType:'application/json',
+							data: {
+								text: req.query.text
+							},
+					  		success: function(data) {
+							try {
+									return JSON.stringify(data);
+									console.log(JSON.stringify(data));
+								} catch(err) {
+									console.log(err);
+								}},
+							error: function(xhr, textStatus, thrownError) {
+								reportError(textStatus);
+								console.log("Error1: " + xhr);
+								console.log("Error2.2: " + thrownError);
+								console.log("Error3: " + textStatus);
+							}
+						});
 
         // save the report and check for errors
         report.save(function(err) {
@@ -64,24 +84,33 @@ router.route('/reports')
                 res.send(err);
 
             res.json({ message: 'Report created!' });
+        });   
+    })
+
+	// get all the reports (accessed at GET http://localhost:$port/api/reports)
+    .get(function(req, res) {
+        Report.find(function(err, reports) {
+            if (err)
+                res.send(err);
+
+            res.json(reports);
         });
-        
     });
 
 // on routes that end in /analyze
-// ----------------------------------------------------   
+// ----------------------------------------------------
 router.route('/analyze')
 
-	//
+	// create a report (accessed at POST http://localhost:$port/api/reports)
 	.get(function(req, res, next) {
-		var name = { name: req.body.name };
-		var text = { text: req.body.text };
+		var name = { name: req.query.name };
+		var text = { text: req.query.text };
 
 		personalityInsights.profile(text, function(err, profile) {
 			if (err)
 				return next(err);
 			else
-				return res.json(profile);
+				return res.json(profile.tree.children);
 		});
 	});
 
