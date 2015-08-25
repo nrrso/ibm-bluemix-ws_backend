@@ -10,7 +10,6 @@ var express 	= require('express');		// call express
 var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var watson		= require('watson-developer-cloud');
-var request 	= require('request');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
 
