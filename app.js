@@ -10,6 +10,8 @@ var express 	= require('express');		// call express
 var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var watson		= require('watson-developer-cloud');
+var assert		= require('assert');
+var restler		= require('restler');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
 
@@ -18,17 +20,20 @@ var Report = require('./models/report.js');
 // create a new express server
 var app = express();
 
-// fetch credentials for a specific property
+// fetch credentials for a specific service
 function getEnv(service, variable) {
-    var VCAP_SERVICES = process.env["VCAP_SERVICES"],
+	if (process.env["VCAP_SERVICES"] !== undefined) {
+		var VCAP_SERVICES = process.env["VCAP_SERVICES"],
         services = JSON.parse(VCAP_SERVICES);
 
-    return services[service][0].credentials[variable]; // get Bluemix credentials
+    	return services[service][0].credentials[variable]; // get Bluemix credentials
+	}
+    return undefined;
 }
 
 var personalityInsights = watson.personality_insights({ // watson api
-	username: getEnv('personality_insights', 'username'),
-	password: getEnv('personality_insights', 'password'),
+	username: getEnv('personality_insights', 'username') || '6ec2e212-8fe6-4fed-940d-8300ed299ede',
+	password: getEnv('personality_insights', 'password') || 'bFBQgLV8gNY4',
 	version: 'v2'
 })
 
@@ -55,6 +60,33 @@ router.get('/', function(req, res) {
 });
 
 // more routes for our API will happen here
+// 
+// on routes that end in /analyze
+// ----------------------------------------------------
+router.route('/near')
+
+	// create a report (accessed at POST http://localhost:$port/api/reports)
+	.get(function(req, res, next) {
+		var loc = req.query.location,
+			rad = req.query.radius,
+			word = req.query.search;
+
+		var apiKey = process.env.GOOGLE_PLACES_API_KEY;
+		var out = process.env.GOOGLE_PLACES_OUTPUT_FORMAT;
+
+	    restler.post('https://maps.googleapis.com/maps/api/place/nearbysearch/'+out, {
+	    	query: {
+	    		location: loc,
+	    		radius: rad,
+	    		keyword: word,
+	    		key: apiKey
+	    	}
+	    }).on('complete', function(response) {
+	    	return res.json(response.results);
+	    }).on('error', function(error) {
+	    	return res.json('GeoError: '+error);
+	    });
+	});
 
 // on routes that end in /analyze
 // ----------------------------------------------------
