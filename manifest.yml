@@ -7,5 +7,5 @@ applications:
   instances: 1
   memory: 256M
   env: 
-  	GOOGLE_PLACES_API_KEY: AIzaSyDzwz2IaVTFxIU1JeonhspuzsqkXu0ehIg
-  	GOOGLE_PLACES_OUTPUT_FORMAT: json
+    GOOGLE_PLACES_API_KEY: AIzaSyDzwz2IaVTFxIU1JeonhspuzsqkXu0ehIg
+    GOOGLE_PLACES_OUTPUT_FORMAT: json
