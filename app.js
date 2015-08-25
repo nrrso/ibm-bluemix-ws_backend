@@ -18,9 +18,17 @@ var Report = require('./models/report.js');
 // create a new express server
 var app = express();
 
+// fetch credentials for a specific property
+function getEnv(service, variable) {
+    var VCAP_SERVICES = process.env["VCAP_SERVICES"],
+        services = JSON.parse(VCAP_SERVICES);
+
+    return services[service][0].credentials[variable]; // get Bluemix credentials
+}
+
 var personalityInsights = watson.personality_insights({ // watson api
-	username: '5f7e254b-36bc-462e-aaad-3632fe820a23',
-	password: 'wWUvvHwHfZEI',
+	username: getEnv('personality_insights', 'username'),
+	password: getEnv('personality_insights', 'password'),
 	version: 'v2'
 })
 
