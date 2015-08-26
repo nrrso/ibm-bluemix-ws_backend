@@ -20,6 +20,9 @@ var Report = require('./models/report.js');
 // create a new express server
 var app = express();
 
+// serve the files out of ./public as our main files
+app.use(express.static(__dirname + '/public'));
+
 // fetch credentials for a specific service
 function getEnv(service, variable) {
 	if (process.env["VCAP_SERVICES"] !== undefined) {

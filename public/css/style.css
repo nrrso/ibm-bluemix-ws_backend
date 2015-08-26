@@ -1,0 +1,127 @@
+@font-face{
+	font-family: "MIB";
+	src: url("../fonts/MIB.ttf");
+}
+html,body {
+  height:100%;
+  font-family: HelveticaNeue,"Helvetica Neue",HelvRegularIBM,Helvetica,Arial,Roboto,sans-serif;
+}
+
+.ibm {
+  font-family: MIB;
+  font-size:90px;
+  color:#466BB0;
+}
+
+.ibm small {
+	font-family: HelveticaNeue,"Helvetica Neue",HelvRegularIBM,Helvetica,Arial,Roboto,sans-serif;
+	font-size: .8em;
+	color:#DFE9E9;
+}
+
+.lead {
+	color:#466BB0;
+	top: 10px;
+}
+
+
+/* Custom container */
+.container-full {
+  margin: 0 auto;
+  width: 100%;
+  background-color:white;
+  overflow:hidden;
+  
+}
+
+.container-full a {
+  color:white;
+  text-decoration:none;
+}
+
+.v-center {
+  margin-top:7%;
+}
+.topbar{
+	background: #323232;
+}
+
+.help-btn {
+	background:transparent;
+	color:white;
+	margin-top:10px;
+	margin-right: 10px;
+	border:2px solid white;
+	border-radius: 0;
+	transition: background 1s, color 1s;
+}
+
+.help-btn:hover {
+	background:white;
+	color:#323232;
+	border:2px solid white;
+	border-radius: 0;
+}
+.error{
+	color: darkred;
+	font-size: 20px;
+	text-align: center;
+}
+.panel-heading a:after {
+    font-family:'Glyphicons Halflings';
+    content:"\e114";
+    float: right;
+    color: grey;
+}
+.panel-heading a.collapsed:after {
+    content:"\e080";
+}
+
+div.tweet-container{
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px solid darkblue;
+	font-size: 12;
+	
+}
+
+div.tweet{
+	border: 1px solid darkblue;
+	font-size: 12;
+}
+
+div.tweet p.header{
+	background: gray;
+	color: white;
+	font-size: 14;
+	font-style: bold;
+}
+
+div.tweet p.body{
+	background: lightblue;
+	color: black;
+	font-size: 12;
+}
+
+#last_row .input-group{
+	display: block;
+}
+
+#last_row textarea{
+	height: 500px;
+	border-radius: 0;
+	background: #eee;
+}
+
+#last_row button {
+	background: #466BB0;
+	border-radius: 0;
+	color:#fff;
+	font-size: 1.5em;
+	margin-top: 1em;
+}
+
+.five-details h1 span {
+	color:#99CC33;
+	font-size: 1.2em;
+}
