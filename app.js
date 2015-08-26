@@ -91,6 +91,30 @@ router.route('/near')
 	    });
 	});
 
+// on routes that end in /near
+// ----------------------------------------------------
+router.route('/sendmail')
+
+	// send a mail (accessed at GET http://localhost:$port/api/sendmail)
+	.get(function(req, res, next) {
+		var api_user = req.query.u,
+			api_password = req.query.p,
+			to = req.query.to,
+			from
+
+		var sendgrid  = require('sendgrid')(api_user, api_password);
+
+		sendgrid.send({
+		  to:       req.query.to,
+		  from:     req.query.from,
+		  subject:  req.query.subject,
+		  text:     req.query.text
+		}, function(err, json) {
+		  if (err) { return next(err); }
+		  return res.json(json);
+		});
+	});
+
 // on routes that end in /analyze
 // ----------------------------------------------------
 router.route('/analyze')
