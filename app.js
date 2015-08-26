@@ -60,7 +60,8 @@ router.get('/', function(req, res) {
 
 // more routes for our API will happen here
 // 
-// on routes that end in /analyze
+
+// on routes that end in /near
 // ----------------------------------------------------
 router.route('/near')
 
@@ -97,9 +98,9 @@ router.route('/analyze')
 		
 		personalityInsights.profile(text, function(err, profile) {
 			if (err) {
-				return next(err);
+				return next(JSON.stringify(err, null, 4));
 			} else {
-				return res.json(profile);
+				return res.json(profile.tree.children);
 			}
 		});
 
@@ -117,7 +118,7 @@ router.route('/reports')
     		var insight;
 
 			if (err) {
-				return next(err);
+				return next(JSON.stringify(err, null, 4));
 			} else {
 				insight = JSON.stringify(profile.tree.children, null, 2);
 			}
