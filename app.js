@@ -50,7 +50,6 @@ var router = express.Router();              // get an instance of the express Ro
 router.use(function(req, res, next) {
     // do logging
     console.log('༼ つ ◕_◕ ༽つ  Incoming');
-    console.log(process.env.GOOGLE_PLACES_API_KEY);
     next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -95,13 +94,15 @@ router.route('/analyze')
 	// create a report (accessed at POST http://localhost:$port/api/reports)
 	.get(function(req, res, next) {
 		var text = { text: req.query.text };
-
+		
 		personalityInsights.profile(text, function(err, profile) {
-			if (err)
+			if (err) {
 				return next(err);
-			else
-				return res.json(profile.tree.children);
+			} else {
+				return res.json(profile);
+			}
 		});
+
 	});
 
 // on routes that end in /reports
@@ -117,8 +118,7 @@ router.route('/reports')
 
 			if (err) {
 				return next(err);
-			}
-			else {
+			} else {
 				insight = JSON.stringify(profile.tree.children, null, 2);
 			}
 
