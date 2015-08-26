@@ -127,8 +127,8 @@ router.route('/reports')
 			}
 
 			var report = new Report();      // create a new instance of the Report model
-	        report.name = name;	// set the bears name (comes from the request)
-	        report.report = insight;
+	        report.name = name;				// set the report name (comes from the request)
+	        report.report = insight;		// set the report as String - for use JSON.parse it
 
 	        // save the report and check for errors
 	        report.save(function(err) {
