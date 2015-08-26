@@ -98,9 +98,7 @@ router.route('/sendmail')
 	// send a mail (accessed at GET http://localhost:$port/api/sendmail)
 	.get(function(req, res, next) {
 		var api_user = req.query.u,
-			api_password = req.query.p,
-			to = req.query.to,
-			from
+			api_password = req.query.p;
 
 		var sendgrid  = require('sendgrid')(api_user, api_password);
 
