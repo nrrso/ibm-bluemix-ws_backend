@@ -91,7 +91,7 @@ router.route('/near')
 				    	query: {
 				    		location: loc,
 				    		radius: rad,
-				    		search: word,
+				    		keyword: word,
 				    		key: apiKey
 				    	}
 				    }).on('complete', this).on('error', this);
