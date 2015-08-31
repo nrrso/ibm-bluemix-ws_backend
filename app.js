@@ -11,6 +11,7 @@ var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var watson		= require('watson-developer-cloud');
 var assert		= require('assert');
+var Step 		= require('step');
 var restler		= require('restler');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
@@ -74,24 +75,42 @@ router.route('/near')
 			rad = req.query.radius,
 			word = req.query.search;
 
-		var apiKey = process.env.GOOGLE_PLACES_API_KEY;
-		var out = process.env.GOOGLE_PLACES_OUTPUT_FORMAT;
+		var apiKey = process.env.GOOGLE_PLACES_API_KEY || 'AIzaSyDzwz2IaVTFxIU1JeonhspuzsqkXu0ehIg';
+		var out = process.env.GOOGLE_PLACES_OUTPUT_FORMAT || 'json';
 
-	    restler.post('https://maps.googleapis.com/maps/api/place/nearbysearch/'+out, {
-	    	query: {
-	    		location: loc,
-	    		radius: rad,
-	    		keyword: word,
-	    		key: apiKey
-	    	}
-	    }).on('complete', function(response) {
-	    	return res.json(response.results);
-	    }).on('error', function(error) {
-	    	return res.json('GeoError: '+error);
-	    });
+	    function retry(millis) {
+		    console.log('Queing another try');
+		    setTimeout(fetchPlaces, millis);
+		}
+
+	    function fetchPlaces() {
+	    	Step(
+		    	function(){
+		    		console.log('Fetching Maps Data...');
+		    		restler.get('https://maps.googleapis.com/maps/api/place/nearbysearch/'+out, {
+				    	query: {
+				    		location: loc,
+				    		radius: rad,
+				    		search: word,
+				    		key: apiKey
+				    	}
+				    }).on('complete', this).on('error', this);
+		    	},
+		    	function(response) {
+		    		console.log('Fetching Data complete.');
+		            if (response.status !== 'OK') {
+		                return res.json('Error: ' + response.status);
+		                retry(5000); // try again after 5 sec
+		            } else {
+		                res.json(response.results);
+		            }
+		    	}
+		    );
+	    }
+	    fetchPlaces();
 	});
 
-// on routes that end in /near
+// on routes that end in /sendmail
 // ----------------------------------------------------
 router.route('/sendmail')
 
