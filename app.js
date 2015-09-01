@@ -10,8 +10,8 @@ var express 	= require('express');		// call express
 var cfenv		= require('cfenv');			// access to cf env vars
 var bodyParser	= require('body-parser');
 var watson		= require('watson-developer-cloud');
-var assert		= require('assert');
 var Step 		= require('step');
+var cors		= require('cors');
 var restler		= require('restler');
 var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
@@ -23,6 +23,7 @@ var app = express();
 
 // serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
+app.use(cors());
 
 // fetch credentials for a specific service
 function getEnv(service, variable) {
