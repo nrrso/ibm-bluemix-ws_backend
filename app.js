@@ -13,10 +13,29 @@ var watson		= require('watson-developer-cloud');
 var Step 		= require('step');
 var cors		= require('cors');
 var restler		= require('restler');
-var mongoose	= require('mongoose');
+var cradle		= require('cradle');
+
+
+var c = new(cradle.Connection)('https://ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix.cloudant.com', 443, {
+  auth: { username: 'ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix', password: 'c5807e9a8b07749a3160beeb5b2e847f9d80f9d7e851e76517bac0464a6c1378' }
+});
+
+var db = c.database('reports');
+
+	db.create();
+
+	db.save('_design/reports', {
+	      all: {
+	          map: function (doc) {
+					  emit(doc._id, doc);
+					}
+	      }
+	  });
+
+/*var mongoose	= require('mongoose');
 mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
 
-var Report = require('./models/report.js');
+var Report = require('./models/report.js');*/
 
 // create a new express server
 var app = express();
@@ -222,6 +241,7 @@ router.route('/reports')
 
     // create a report and save it to mongodb (accessed at POST http://localhost:$port/api/reports)
     .post(function(req, res, next) {
+    	var _res = res;
     	var name = req.query.name;
 
     	personalityInsights.profile({ text: req.query.text }, function(err, profile) {
@@ -233,28 +253,17 @@ router.route('/reports')
 				insight = JSON.stringify(profile.tree.children, null, 2);
 			}
 
-			var report = new Report();      // create a new instance of the Report model
-	        report.name = name;				// set the report name (comes from the request)
-	        report.report = insight;		// set the report as String - for use JSON.parse it
+			db.save(name, {
+			      report: insight,
+			      type: 'report'
+			  }, function (err, res) {
+			      // Handle response
+			      if (err)
+	                _res.send(err);
 
-	        // save the report and check for errors
-	        report.save(function(err) {
-	            if (err)
-	                res.send(err);
-
-	            res.json({ message: 'Report created!' });
-	        });
+	            _res.json({ message: 'Report created!' });
+			});
 		});
-    })
-
-	// get all the reports (accessed at GET http://localhost:$port/api/reports)
-    .get(function(req, res) {
-        Report.find(function(err, reports) {
-            if (err)
-                res.send(err);
-
-            res.json(reports);
-        });
     });
 
 // REGISTER OUR ROUTES -------------------------------
