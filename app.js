@@ -94,7 +94,10 @@ router.route('/geocode')
 	.get(function(req, res, next) {
 		console.log('Fetching of geocode complete.');
 		var arrToSend = [
-			{
+			{	
+				name: 'Futschik & Kollegen',
+				phone: '089/555861-3 ',
+				mail: 'RA-Futschik@t-online.de',
 				address: 'Schwanthalerstraße 34',
 				city: 'München',
 				state: 'Bayern',
@@ -102,7 +105,10 @@ router.route('/geocode')
 				country: 'DEU',
 				coordinates: ['48.13252', '11.55431']
 			},
-			{
+			{	
+				name: 'Ullrich Rechtsanwälte',
+				phone: '0351/4247390',
+				mail: 'info@ullrich-rechtsanwaelte.de',
 				address: 'Könneritzstraße 3',
 				city: 'Dresden',
 				state: 'Sachsen',
