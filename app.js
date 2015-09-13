@@ -92,73 +92,27 @@ router.route('/geocode')
 
 	// create a report (accessed at POST http://localhost:$port/api/reports)
 	.get(function(req, res, next) {
-		var geocodedLocation = {
-			address: null,
-			city: null,
-			state: null,
-			zip: null,
-			country: null,
-			coordinates: []
-		}
+		console.log('Fetching of geocode complete.');
+		var arrToSend = [
+			{
+				address: 'Schwanthalerstraße 34',
+				city: 'München',
+				state: 'Bayern',
+				zip: '80336',
+				country: 'DEU',
+				coordinates: ['48.13252', '11.55431']
+			},
+			{
+				address: 'Könneritzstraße 3',
+				city: 'Dresden',
+				state: 'Sachsen',
+				zip: '01067',
+				country: 'DEU',
+				coordinates: ['51.0579555', '13.7271012']
+			}
+		];
 
-	    function retry(millis) {
-		    console.log('Queing another try');
-		    setTimeout(fetchPlaces, millis);
-		}
-
-	    function fetchCoords() {
-	    	var geocodeService = getEnv('user_provided', 'url') || 'https://pitneybowes.pbondemand.com/location/address/geocode.json';
-	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
-
-	    	Step(
-		    	/*function(){
-		    		console.log('Fetching geocode Data...');
-		    		restler.get(geocodeService, {
-				    	query: {
-				    		address: req.query.address,
-				    		city: req.query.city,
-				    		stateProvince: req.query.state,	
-				    		postalCode: req.query.zip,
-				    		country: req.query.country,
-				    		fallbackToPostal: "Y",
-				    		fallbackToStreet: "Y",
-				    		fallbackToGeographic: "Y",
-				    		closeMatchesOnly: "Y",
-				    		appId: appId
-				    	}
-				    }).on('complete', this).on('error', this);
-		    	},*/
-		    	function(response) {
-		    		console.log('Fetching of geocode complete.');
-		    		var arrToSend = [
-		    			{
-							address: 'Schwanthalerstraße 34',
-							city: 'München',
-							state: 'Bayern',
-							zip: '80336',
-							country: 'DEU',
-							coordinates: ['48.13252', '11.55431']
-						},
-						{
-							address: 'Könneritzstraße 3',
-							city: 'Dresden',
-							state: 'Sachsen',
-							zip: '01067',
-							country: 'DEU',
-							coordinates: ['51.0579555', '13.7271012']
-						}
-		    		];
-		            ////sif (response) {
-		            	
-		                res.json(arrToSend);
-		            /*} else {
-		            	return res.json('Error: Something somewhere went wrong! Check your Input.');
-		                retry(5000); // try again after 5 sec
-		            }*/
-		    	}
-		    );
-	    }
-	    fetchCoords();
+	    return res.json(arrToSend);
 	});
 
 // on routes that end in /near
