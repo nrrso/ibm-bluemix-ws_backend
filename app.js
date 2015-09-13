@@ -111,7 +111,7 @@ router.route('/geocode')
 	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
 
 	    	Step(
-		    	function(){
+		    	/*function(){
 		    		console.log('Fetching geocode Data...');
 		    		restler.get(geocodeService, {
 				    	query: {
@@ -127,23 +127,34 @@ router.route('/geocode')
 				    		appId: appId
 				    	}
 				    }).on('complete', this).on('error', this);
-		    	},
+		    	},*/
 		    	function(response) {
 		    		console.log('Fetching of geocode complete.');
-		            if (response) {
-		            	geocodedLocation = {
-							address: req.query.address,
-							city: req.query.city,
-							state: req.query.state,
-							zip: req.query.zip,
-							country: req.query.country,
-							coordinates: [response["Output"]["Latitude"], response["Output"]["Longitude"]]
+		    		var arrToSend = [
+		    			{
+							address: 'Schwanthalerstraße 34',
+							city: 'München',
+							state: 'Bayern',
+							zip: '80336',
+							country: 'DEU',
+							coordinates: ['48.13252', '11.55431']
+						},
+						{
+							address: 'Könneritzstraße 3',
+							city: 'Dresden',
+							state: 'Sachsen',
+							zip: '01067',
+							country: 'DEU',
+							coordinates: ['51.0579555', '13.7271012']
 						}
-		                res.json(geocodedLocation);
-		            } else {
+		    		];
+		            ////sif (response) {
+		            	
+		                res.json(arrToSend);
+		            /*} else {
 		            	return res.json('Error: Something somewhere went wrong! Check your Input.');
 		                retry(5000); // try again after 5 sec
-		            }
+		            }*/
 		    	}
 		    );
 	    }
