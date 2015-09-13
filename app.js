@@ -14,9 +14,9 @@ var Step 		= require('step');
 var cors		= require('cors');
 var restler		= require('restler');
 var cradle		= require('cradle');
+var excel		= require('node-xlsx');
 
-
-var c = new(cradle.Connection)('https://ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix.cloudant.com', 443, {
+var c = new cradle.Connection('https://ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix.cloudant.com', 443, {
   auth: { username: 'ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix', password: 'c5807e9a8b07749a3160beeb5b2e847f9d80f9d7e851e76517bac0464a6c1378' }
 });
 
@@ -266,6 +266,44 @@ router.route('/reports')
 		});
     });
 
+// route for read file
+
+router.route('/file')
+	.get(function(){
+		//read file in base dir
+		var file = excel.parse(__dirname + '/test.xls');
+		//read sheet based on array key
+		var sheet0 = file[0];
+		//read data of sheet
+		var data = sheet0.data;
+		//loop except of key 0 -> header information
+		var addresses = new Array();
+		for (var i = 1; i <= 5 ; i++) {
+			var address = data[i];
+			var currentAddress = {
+				location: address[1],
+				plz: address[0],
+				street: address[2],
+				name: address[3],
+				lastChange: address[4],
+				phone: address[7],
+				mail: address[9],
+				arbr: address[20],
+				ebrr: address[21],
+				famr: address[22],
+				medizinr: address[23],
+				mietr: address[24],
+				strafr: address[26],
+				verkr: address[27]
+			};
+
+			//save to return param
+			addresses.push(currentAddress);
+			
+		};
+		//return is array with objects
+		return addresses;
+	});
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
