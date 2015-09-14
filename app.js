@@ -119,7 +119,6 @@ router.route('/geocode')
 
 		function retry(millis) {
 		    console.log('Queing another try');
-		    console.log('Queing another try');
 		    setTimeout(fetchCoords, millis);
 		}
 
@@ -162,7 +161,7 @@ router.route('/geocode')
 	    for (var i = 0; i < addresses.length; i++) {
 	    	fetchCoords(i);
 	    };
-	    return res.json(result);
+	    return res.json(addresses);
 	});
 
 // on routes that end in /near
