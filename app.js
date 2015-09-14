@@ -115,6 +115,7 @@ router.route('/geocode')
 
 	// create a report (accessed at POST http://localhost:$port/api/reports)
 	.get(function(req, res, next) {
+		var result = [];
 
 		function retry(millis) {
 		    console.log('Queing another try');
@@ -125,8 +126,6 @@ router.route('/geocode')
 	    function fetchCoords(i) {
 	    	var geocodeService = getEnv('user_provided', 'url') || 'https://pitneybowes.pbondemand.com/location/address/geocode.json';
 	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
-			
-			var result;
  
 	    	Step(
 		    	function(){
@@ -150,24 +149,20 @@ router.route('/geocode')
 		    	},
 	    		function(response) {
 		            if (response) {
-		            	console.log('Fetching of geocode complete.');
-		                result = response;
+		            	console.log('completed');
+		            	console.log(response.Output.Latitude);
+		            	addresses[i].coordinates = [response['Output']['Latitude'], response['Output']['Longtitude']];
 		            } else {
-		            	result = {Error: 'Something somewhere went wrong! Check your Input.'};
+		            	console.log('Error: Something somewhere went wrong! Check your Input.');
 		                retry(5000); // try again after 5 sec
 		            }
-		    	},
-		    	function(){
-		    		if(i < addresses.length){
-				    	var c = i + 1;
-				    	fetchCoords(c);
-				    } else {
-				    	return res.json(result);
-				    }
 		    	}
 		    );
 	    }
-	    fetchCoords(0);
+	    for (var i = 0; i < addresses.length; i++) {
+	    	fetchCoords(i);
+	    };
+	    return res.json(result);
 	});
 
 // on routes that end in /near
