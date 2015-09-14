@@ -81,32 +81,34 @@ router.get('/', function(req, res) {
 	//read data of sheet
 	var data = sheet0.data;
 	//loop except of key 0 -> header information
-	var addresses = new Array();
+	var addresses = [];
 
-	for (var i = 1; i <= 5 ; i++) {
+	for (var i = 1; i < 4; i++) {
 		var address = data[i];
 		var currentAddress = {
-			city: address[1],
-			zip: address[0],
-			street: address[2],
-			name: address[3],
-			lastChange: address[4],
-			phone: address[7],
-			mail: address[9],
-			arbr: address[20],
-			ebrr: address[21],
-			famr: address[22],
-			medizinr: address[23],
-			mietr: address[24],
-			strafr: address[26],
-			verkr: address[27]
-			coordinates: []
+			state: address[0],
+			city: address[2],
+			zip: address[1],
+			street: address[3],
+			name: address[4],
+			lastChange: address[5],
+			phone: address[8],
+			mail: address[10],
+			arbr: address[21],
+			ebrr: address[22],
+			famr: address[23],
+			medizinr: address[24],
+			mietr: address[25],
+			strafr: address[27],
+			verkr: address[28],
+			coordinates: null
 		};
 
 		//save to return param
 		addresses.push(currentAddress);
 		
-	};	
+	};
+	
 // on routes that end in /near
 // ----------------------------------------------------
 router.route('/geocode')
@@ -117,56 +119,55 @@ router.route('/geocode')
 		function retry(millis) {
 		    console.log('Queing another try');
 		    console.log('Queing another try');
-		    setTimeout(fetchPlaces, millis);
+		    setTimeout(fetchCoords, millis);
 		}
 
-	    function fetchCoords() {
+	    function fetchCoords(i) {
 	    	var geocodeService = getEnv('user_provided', 'url') || 'https://pitneybowes.pbondemand.com/location/address/geocode.json';
 	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
 			
-			console.log('Fetching of geocode complete.');
+			var result;
  
 	    	Step(
 		    	function(){
 		    		console.log('Fetching geocode Data...');
-		    		for (var i = 0; i < addresses.length; i++) {
-		    			restler.get(geocodeService, {
-					    	query: {
-					    		address: addresses[i],
-				    			city: addresses[i],
-					    		stateProvince: addresses[i],	
-					    		postalCode: addresses[i],
-					    		country: addresses[i],
-					    		fallbackToPostal: "Y",
-				    			fallbackToStreet: "Y",
-					    		fallbackToGeographic: "Y",
-					    		closeMatchesOnly: "Y",
-					    		appId: appId
-					    	}
-					    }).on('complete', this).on('error', this);
-		    		};
+	    			restler.get(geocodeService, {
+				    	query: {
+				    		address: addresses[i].street,
+			    			city: addresses[i].city,
+				    		stateProvince: addresses[i].state,	
+				    		postalCode: addresses[i].zip,
+				    		country: "DEU",
+				    		fallbackToPostal: "Y",
+			    			fallbackToStreet: "Y",
+				    		fallbackToGeographic: "Y",
+				    		closeMatchesOnly: "Y",
+				    		appId: appId
+				    	}
+				    })
+				    .on('complete', this)
+				    .on('error', this);
 		    	},
 	    		function(response) {
-		    		console.log('Fetching of geocode complete.');
 		            if (response) {
-		            	geocodedLocation = {
-							address: req.query.address,
-							city: req.query.city,
-							state: req.query.state,
-							zip: req.query.zip,
-							country: req.query.country,
-							coordinates: [response["Output"]["Latitude"], response["Output"]["Longitude"]]
-						}
-		                res.json(geocodedLocation);
+		            	console.log('Fetching of geocode complete.');
+		                result = response;
 		            } else {
-		            	return res.json('Error: Something somewhere went wrong! Check your Input.');
+		            	result = {Error: 'Something somewhere went wrong! Check your Input.'};
 		                retry(5000); // try again after 5 sec
 		            }
+		    	},
+		    	function(){
+		    		if(i < addresses.length){
+				    	var c = i + 1;
+				    	fetchCoords(c);
+				    } else {
+				    	return res.json(result);
+				    }
 		    	}
 		    );
 	    }
-	    fetchCoords();
-	    return res.json(arrToSend);
+	    fetchCoords(0);
 	});
 
 // on routes that end in /near
