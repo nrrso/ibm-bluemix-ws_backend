@@ -6,27 +6,25 @@
 
 // This application uses express as its web server
 // for more info, see: http://expressjs.com
-var express 	= require('express');		// call express
-var cfenv		= require('cfenv');			// access to cf env vars
-var bodyParser	= require('body-parser');
-var watson		= require('watson-developer-cloud');
-var Step 		= require('step');
-var cors		= require('cors');
-var restler		= require('restler');
-var cradle		= require('cradle');
-var excel		= require('node-xlsx');
+var express 	= ; //
+var cfenv		= ; //
+var bodyParser	= ;
+var watson		= ;
+var Step 		= ;
+var cors		= ;
+var restler		= ;
+var cradle		= ;
+var excel		= ;
 
-var c = new cradle.Connection('https://ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix.cloudant.com', 443, {
-  auth: { username: 'ca1238d6-7808-480d-bd8e-aa64222c5a59-bluemix', password: 'c5807e9a8b07749a3160beeb5b2e847f9d80f9d7e851e76517bac0464a6c1378' }
-});
+var c = new cradle.Connection();
 
-var db = c.database('reports');
+var db = ;
 
-	db.create();
+	// create db if not existing
 
 
 // create a new express server
-var app = express();
+var app = ;
 
 // serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
@@ -43,11 +41,8 @@ function getEnv(service, variable) {
     return undefined;
 }
 
-var personalityInsights = watson.personality_insights({ // watson api
-	username: getEnv('personality_insights', 'username') || '6ec2e212-8fe6-4fed-940d-8300ed299ede',
-	password: getEnv('personality_insights', 'password') || 'bFBQgLV8gNY4',
-	version: 'v2'
-})
+// add credentials for watson PI
+var personalityInsights = watson.personality_insights(// env vars)
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -56,275 +51,122 @@ app.use(bodyParser.json());
 
 // ROUTES FOR OUR API
 // =============================================================================
-var router = express.Router();              // get an instance of the express Router
+var router = ;              // get an instance of the express Router
 
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
-    console.log('༼ つ ◕_◕ ༽つ  Incoming');
-    next(); // make sure we go to the next routes and don't stop here
+    
+    // make sure we go to the next routes and don't stop here
 });
 
 // test route to make sure everything is working (accessed at GET http://localhost:$port/api)
 router.get('/', function(req, res) {
-    res.json({ message: 'Success! welcome to our api!' });   
+    // welcome the user to the api uri
+
 });
 
-// more routes for our API will happen here
-// 
+
 
 // Get Excel File and parse it
 // read file in base dir
-	var file = excel.parse(__dirname + '/test.xls');
-	//read sheet based on array key
-	var sheet0 = file[0];
-	//read data of sheet
-	var data = sheet0.data;
-	//loop except of key 0 -> header information
-	var addresses = [];
 
-	for (var i = 1; i < 4; i++) {
-		var address = data[i];
-		var currentAddress = {
-			state: address[0],
-			city: address[2],
-			zip: address[1],
-			street: address[3],
-			name: address[4],
-			lastChange: address[5],
-			phone: address[8],
-			mail: address[10],
-			arbr: address[21],
-			ebrr: address[22],
-			famr: address[23],
-			medizinr: address[24],
-			mietr: address[25],
-			strafr: address[27],
-			verkr: address[28],
-			coordinates: null
-		};
 
-		//save to return param
-		addresses.push(currentAddress);
-		
-	};
-	
-// on routes that end in /near
+// more routes for our API will happen here
+// 	
+// on routes that end in /geocode
 // ----------------------------------------------------
 router.route('/geocode')
 
-	// create a report (accessed at POST http://localhost:$port/api/reports)
-	.get(function(req, res, next) {
-		var result = [];
+	// get coords (accessed at POST http://localhost:$port/api/geocode)
 
-		function retry(millis) {
-		    console.log('Queing another try');
-		    setTimeout(fetchCoords, millis);
-		}
+		// variables
 
-	    function fetchCoords(i) {
-	    	var geocodeService = getEnv('user_provided', 'url') || 'https://pitneybowes.pbondemand.com/location/address/geocode.json';
-	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
- 
-	    	Step(
-		    	function(){
-		    		console.log('Fetching geocode Data...');
-	    			restler.get(geocodeService, {
-				    	query: {
-				    		address: addresses[i].street,
-			    			city: addresses[i].city,
-				    		stateProvince: addresses[i].state,	
-				    		postalCode: addresses[i].zip,
-				    		country: "DEU",
-				    		fallbackToPostal: "Y",
-			    			fallbackToStreet: "Y",
-				    		fallbackToGeographic: "Y",
-				    		closeMatchesOnly: "Y",
-				    		appId: appId
-				    	}
-				    })
-				    .on('complete', this)
-				    .on('error', this);
-		    	},
-	    		function(response) {
-		            if (response) {
-		            	console.log('completed');
-		            	console.log(response.Output.Latitude);
-		            	addresses[i].coordinates = [response['Output']['Latitude'], response['Output']['Longtitude']];
-		            } else {
-		            	console.log('Error: Something somewhere went wrong! Check your Input.');
-		                retry(5000); // try again after 5 sec
-		            }
-		    	}
-		    );
-	    }
-	    for (var i = 0; i < addresses.length; i++) {
-	    	fetchCoords(i);
-	    };
-	    return res.json(addresses);
-	});
+		// retry function, uses setTimeout(fn, time)
+
+		// fn 
+
+	    	// geocode Service Environment Vars
+ 			
+ 			// step
+
+	    		// fn 1
+
+		    	// fn 2
+
+		// call to fn
+
+		// return processed array when everything finished
+
 
 // on routes that end in /near
 // ----------------------------------------------------
 router.route('/near')
 
-	// create a report (accessed at POST http://localhost:$port/api/reports)
-	.get(function(req, res, next) {
-		var loc = req.query.location,
-			rad = req.query.radius,
-			word = req.query.search;
+	// get places based on keyword (accessed at POST http://localhost:$port/api/near)
 
-		var apiKey = process.env.GOOGLE_PLACES_API_KEY || 'AIzaSyDzwz2IaVTFxIU1JeonhspuzsqkXu0ehIg';
-		var out = process.env.GOOGLE_PLACES_OUTPUT_FORMAT || 'json';
+		// variables
 
-	    function retry(millis) {
-		    console.log('Queing another try');
-		    setTimeout(fetchPlaces, millis);
-		}
+		// retry function, uses setTimeout(fn, time)
 
-	    function fetchPlaces() {
-	    	Step(
-		    	function(){
-		    		console.log('Fetching Maps Data...');
-		    		restler.get('https://maps.googleapis.com/maps/api/place/nearbysearch/'+out, {
-				    	query: {
-				    		location: loc,
-				    		radius: rad,
-				    		keyword: word,
-				    		key: apiKey
-				    	}
-				    }).on('complete', this).on('error', this);
-		    	},
-		    	function(response) {
-		    		console.log('Fetching Data complete.');
-		            if (response.status !== 'OK') {
-		                return res.json('Error: ' + response.status);
-		                retry(5000); // try again after 5 sec
-		            } else {
-		                res.json(response.results);
-		            }
-		    	}
-		    );
-	    }
-	    fetchPlaces();
-	});
+		// fn 
+
+	    	// maps  Environment Vars
+ 			
+ 			// step
+
+	    		// fn 1
+
+		    	// fn 2
+		
+		// call to fn
+
+		// return processed array when everything finished
+
 
 // on routes that end in /sendmail
 // ----------------------------------------------------
 router.route('/sendmail')
 
 	// send a mail (accessed at GET http://localhost:$port/api/sendmail)
-	.get(function(req, res, next) {
-		var api_user = req.query.u,
-			api_password = req.query.p;
 
-		var sendgrid  = require('sendgrid')(api_user, api_password);
+		// variable
 
-		sendgrid.send({
-		  to:       req.query.to,
-		  from:     req.query.from,
-		  subject:  req.query.subject,
-		  text:     req.query.text
-		}, function(err, json) {
-		  if (err) { return next(err); }
-		  return res.json(json);
-		});
-	});
+		// initialize sendgrid Service
+
+		// send mail with sendgrid
+
 
 // on routes that end in /analyze
 // ----------------------------------------------------
 router.route('/analyze')
 
 	// create a report (accessed at POST http://localhost:$port/api/reports)
-	.get(function(req, res, next) {
-		var text = { text: req.query.text };
-		
-		personalityInsights.profile(text, function(err, profile) {
-			if (err) {
-				return next(JSON.stringify(err, null, 4));
-			} else {
-				return res.json(profile.tree.children);
-			}
-		});
 
-	});
+		// variable
+
+		// use pi service
+
 
 // on routes that end in /reports
 // ----------------------------------------------------
 router.route('/reports')
 
     // create a report and save it to mongodb (accessed at POST http://localhost:$port/api/reports)
-    .post(function(req, res, next) {
-    	var _res = res;
-    	var name = req.query.name;
+    // post
 
-    	personalityInsights.profile({ text: req.query.text }, function(err, profile) {
-    		var insight;
+    	// variable
 
-			if (err) {
-				return next(JSON.stringify(err, null, 4));
-			} else {
-				insight = JSON.stringify(profile.tree.children, null, 2);
-			}
+    	// use pi service
 
-			db.save(name, {
-			      report: insight,
-			      type: 'report'
-			  }, function (err, res) {
-			      // Handle response
-			      if (err)
-	                _res.send(err);
+    		// save to db
 
-	            _res.json({ message: 'Report created!' });
-			});
-		});
-    });
-
-// route for read file
-
-router.route('/file')
-	.get(function(){
-		//read file in base dir
-		var file = excel.parse(__dirname + '/test.xls');
-		//read sheet based on array key
-		var sheet0 = file[0];
-		//read data of sheet
-		var data = sheet0.data;
-		//loop except of key 0 -> header information
-		var addresses = new Array();
-		for (var i = 1; i <= 5 ; i++) {
-			var address = data[i];
-			var currentAddress = {
-				location: address[1],
-				plz: address[0],
-				street: address[2],
-				name: address[3],
-				lastChange: address[4],
-				phone: address[7],
-				mail: address[9],
-				arbr: address[20],
-				ebrr: address[21],
-				famr: address[22],
-				medizinr: address[23],
-				mietr: address[24],
-				strafr: address[26],
-				verkr: address[27]
-			};
-
-			//save to return param
-			addresses.push(currentAddress);
-			
-		};
-		//return is array with objects
-		return addresses;
-	});
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
-app.use('/api', router);
 
 // get the app environment from Cloud Foundry
-var appEnv = cfenv.getAppEnv();
+var appEnv = ;
 
 // start server on the specified port and binding host
 app.listen(appEnv.port, function() {
