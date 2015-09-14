@@ -24,18 +24,6 @@ var db = c.database('reports');
 
 	db.create();
 
-	db.save('_design/reports', {
-	      all: {
-	          map: function (doc) {
-					  emit(doc._id, doc);
-					}
-	      }
-	  });
-
-/*var mongoose	= require('mongoose');
-mongoose.connect('mongodb://geni:7xrZ4@ds033153.mongolab.com:33153/hskae'); // connect to our database
-
-var Report = require('./models/report.js');*/
 
 // create a new express server
 var app = express();
@@ -85,39 +73,99 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 // 
 
+// Get Excel File and parse it
+// read file in base dir
+	var file = excel.parse(__dirname + '/test.xls');
+	//read sheet based on array key
+	var sheet0 = file[0];
+	//read data of sheet
+	var data = sheet0.data;
+	//loop except of key 0 -> header information
+	var addresses = new Array();
 
+	for (var i = 1; i <= 5 ; i++) {
+		var address = data[i];
+		var currentAddress = {
+			city: address[1],
+			zip: address[0],
+			street: address[2],
+			name: address[3],
+			lastChange: address[4],
+			phone: address[7],
+			mail: address[9],
+			arbr: address[20],
+			ebrr: address[21],
+			famr: address[22],
+			medizinr: address[23],
+			mietr: address[24],
+			strafr: address[26],
+			verkr: address[27]
+			coordinates: []
+		};
+
+		//save to return param
+		addresses.push(currentAddress);
+		
+	};	
 // on routes that end in /near
 // ----------------------------------------------------
 router.route('/geocode')
 
 	// create a report (accessed at POST http://localhost:$port/api/reports)
 	.get(function(req, res, next) {
-		console.log('Fetching of geocode complete.');
-		var arrToSend = [
-			{	
-				name: 'Futschik & Kollegen',
-				phone: '089/555861-3 ',
-				mail: 'RA-Futschik@t-online.de',
-				address: 'Schwanthalerstraße 34',
-				city: 'München',
-				state: 'Bayern',
-				zip: '80336',
-				country: 'DEU',
-				coordinates: ['48.13252', '11.55431']
-			},
-			{	
-				name: 'Ullrich Rechtsanwälte',
-				phone: '0351/4247390',
-				mail: 'info@ullrich-rechtsanwaelte.de',
-				address: 'Könneritzstraße 3',
-				city: 'Dresden',
-				state: 'Sachsen',
-				zip: '01067',
-				country: 'DEU',
-				coordinates: ['51.0579555', '13.7271012']
-			}
-		];
 
+		function retry(millis) {
+		    console.log('Queing another try');
+		    console.log('Queing another try');
+		    setTimeout(fetchPlaces, millis);
+		}
+
+	    function fetchCoords() {
+	    	var geocodeService = getEnv('user_provided', 'url') || 'https://pitneybowes.pbondemand.com/location/address/geocode.json';
+	    	var appId = getEnv('user_provided', 'appId') || "3cf9cedd-5218-422d-abe6-84e58cf919ef";
+			
+			console.log('Fetching of geocode complete.');
+ 
+	    	Step(
+		    	function(){
+		    		console.log('Fetching geocode Data...');
+		    		for (var i = 0; i < addresses.length; i++) {
+		    			restler.get(geocodeService, {
+					    	query: {
+					    		address: addresses[i],
+				    			city: addresses[i],
+					    		stateProvince: addresses[i],	
+					    		postalCode: addresses[i],
+					    		country: addresses[i],
+					    		fallbackToPostal: "Y",
+				    			fallbackToStreet: "Y",
+					    		fallbackToGeographic: "Y",
+					    		closeMatchesOnly: "Y",
+					    		appId: appId
+					    	}
+					    }).on('complete', this).on('error', this);
+		    		};
+		    	},
+	    		function(response) {
+		    		console.log('Fetching of geocode complete.');
+		            if (response) {
+		            	geocodedLocation = {
+							address: req.query.address,
+							city: req.query.city,
+							state: req.query.state,
+							zip: req.query.zip,
+							country: req.query.country,
+							coordinates: [response["Output"]["Latitude"], response["Output"]["Longitude"]]
+						}
+		                res.json(geocodedLocation);
+		            } else {
+		            	return res.json('Error: Something somewhere went wrong! Check your Input.');
+		                retry(5000); // try again after 5 sec
+		            }
+		    	}
+		    );
+	    }
+	    fetchCoords();
 	    return res.json(arrToSend);
 	});
 
@@ -275,6 +323,7 @@ router.route('/file')
 		//return is array with objects
 		return addresses;
 	});
+
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
